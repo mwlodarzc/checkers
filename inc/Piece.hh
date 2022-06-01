@@ -1,11 +1,11 @@
-#ifndef SQUARE_HH
-#define SQUARE_HH
-class Square
+#ifndef PIECE_HH
+#define PIECE_HH
+class Piece
 {
 private:
     int xCoordinate;
     int yCoordinate;
-    bool piecePlaced;
+
     bool pieceLightColoured;
     bool pieceIsKing;
 
