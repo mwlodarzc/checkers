@@ -5,26 +5,20 @@ class Piece
 private:
     int xCoordinate;
     int yCoordinate;
-
-    bool pieceLightColoured;
-    bool pieceIsKing;
+    bool isLightColour;
+    bool isKing;
 
 public:
-    CheckerBoardSquare();
-    CheckerBoardSquare(int x, int y, bool placed, bool lightColoured, bool isKing);
-    CheckerBoardSquare(CheckerBoardSquare &);
-    ~CheckerBoardSquare();
+    Piece();
+    Piece(int x, int y, bool lightColoured, bool promoted);
+    Piece(Piece &);
+    ~Piece();
     int getX() const;
     int getY() const;
-    void setX(int x);
-    void setY(int y);
-    void clear();
-    void placePiece(bool placeWhite);
-    void removePiece();
+    void setCoordinates(int x, int y);
     void promotePiece();
-    bool isEmpty() const;
-    bool holdsWhite() const;
-    bool isKing() const;
+    bool isLightColoured() const;
+    bool isPromoted() const;
 };
 
 #endif
