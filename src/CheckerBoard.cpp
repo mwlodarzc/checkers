@@ -84,7 +84,38 @@ bool CheckerBoard::move(int idChosen, int idDest)
     }
     return false;
 }
-std::shared_ptr<Square> CheckerBoard::operator[](int index) { return m_grid[index]; }
+Square &CheckerBoard::getSquare(int index)
+{
+    if (index < 0 || index >= 50)
+    {
+        std::cerr << "Out of bounds!" << std::endl;
+        exit(1);
+    }
+    return *m_grid[index];
+}
+int CheckerBoard::gridize(int x, int y) const
+{
+    return (y * m_gridSize + x) / 2;
+}
+
+std::tuple<int, int> CheckerBoard::gridize(int index) const
+{
+    if ((index %10 < 5)
+    {
+        return;
+    }
+    else
+}
+
+std::shared_ptr<Square> CheckerBoard::operator[](int index)
+{
+    if (index < 0 || index >= 50)
+    {
+        std::cerr << "Out of bounds!" << std::endl;
+        exit(1);
+    }
+    return m_grid[index];
+}
 
 std::ostream &operator<<(std::ostream &strm, CheckerBoard &printed)
 {

@@ -1,7 +1,7 @@
 #ifndef GAME_HH
 #define GAME_HH
 #include <SDL2/SDL.h>
-#include <SDL/SDL_image.h>
+#include <SDL2/SDL_image.h>
 #include "CheckerBoard.hh"
 
 class Game
@@ -11,10 +11,19 @@ private:
     SDL_Window *m_window;
     SDL_Renderer *m_renderer;
     int m_pixelSize = 100;
-    CheckerBoard *m_board;
 
 private:
-    SDL_Texture *loadTexture(std::string path);
+    CheckerBoard *m_board;
+    std::vector<std::shared_ptr<Square>> m_moves;
+
+private:
+    SDL_Texture *white_king = NULL;
+    SDL_Texture *white_men = NULL;
+    SDL_Texture *dark_king = NULL;
+    SDL_Texture *dark_men = NULL;
+
+private:
+    void loadTextures();
 
 public:
     Game();

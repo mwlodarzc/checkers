@@ -17,15 +17,18 @@ void Game::init(std::string title, int xpos, int ypos, int width, int height, bo
         m_window = SDL_CreateWindow("title", xpos, ypos, width, height, flags);
         if (m_window)
             std::cout << "Window created!" << std::endl;
-        m_renderer = SDL_CreateRenderer(m_window, -1, 0);
+        m_renderer = SDL_CreateRenderer(m_window, -1, SDL_RENDERER_ACCELERATED);
         if (m_renderer)
             std::cout << "Renderer created!" << std::endl;
-
+        if (IMG_Init(IMG_INIT_PNG) == IMG_INIT_PNG)
+            std::cout << "Image initialized!" << std::endl;
+        loadTextures();
         m_ongoing = true;
     }
     else
         m_ongoing = false;
 }
+
 bool Game::running() { return m_ongoing; }
 
 void Game::handleEvents()
@@ -37,7 +40,16 @@ void Game::handleEvents()
     case SDL_QUIT:
         m_ongoing = false;
         break;
-
+    case SDL_MOUSEBUTTONDOWN:
+        int x, y;
+        SDL_GetMouseState(&x, &y);
+        x = std::floor(x / m_pixelSize);
+        y = std::floor(y / m_pixelSize);
+        std::cout << "x,y : " << x << "," << y << std::endl;
+        if (x % 2 == y % 2)
+            break;
+        std::cout << "black " << m_board->gridize(x, y) << std::endl;
+        break;
     default:
         break;
     }
@@ -48,54 +60,93 @@ void Game::renderer()
     if (m_ongoing)
     {
         SDL_RenderClear(m_renderer);
-        SDL_SetRenderDrawColor(m_renderer, 51, 0, 51, 255);
-        SDL_RenderClear(m_renderer);
-        SDL_SetRenderDrawColor(m_renderer, 200, 0, 200, 255);
-        for (int i = 0; i < 10; i++)
-            for (int j = 0; j < 10; j++)
-                if (i % 2 == j % 2)
-                {
-                    SDL_Rect r = {i * m_pixelSize, j * m_pixelSize, m_pixelSize, m_pixelSize};
-                    SDL_RenderFillRect(m_renderer, &r);
-                }
-        for (int i = 0; i < 50; i++)
-        {
-            // if (m_board[i]->getIndex())
-            //     if (p.front()->isPromoted())
-            //         SDL_Texture *t = loadTexture("/images/white_king.png");
-            //     else
-            //         SDL_Texture *t = loadTexture("/images/white_men.png");
-            // else
-            // {
-            //     if (p.front()->isPromoted())
-            //         SDL_Texture *t = loadTexture("/images/dark_king.png");
-            //     else
-            //         SDL_Texture *t = loadTexture("/images/dark_men.png");
-            // }
-            // SDL_Rect r = { p.front() }
-        }
+        SDL_SetRenderDrawColor(m_renderer, 150, 0, 150, 255);
 
-        SDL_RenderPresent(m_renderer);
+        SDL_RenderClear(m_renderer);
+        SDL_SetRenderDrawColor(m_renderer, 50, 0, 50, 255);
+
+        for (int i = 0, index = 0; i < 10; i++)
+            for (int j = 0; j < 10; j++)
+                if (i % 2 != j % 2)
+                {
+                    SDL_Rect r = {j * m_pixelSize, i * m_pixelSize, m_pixelSize, m_pixelSize};
+                    SDL_RenderFillRect(m_renderer, &r);
+                    if (!m_board->getSquare(index).isEmpty())
+                    {
+                        if (m_board->getSquare(index).getPiece()->isLightColoured())
+
+                            if (m_board->getSquare(index).getPiece()->isPromoted())
+                                SDL_RenderCopy(m_renderer, white_king, NULL, &r);
+
+                            else
+                                SDL_RenderCopy(m_renderer, white_men, NULL, &r);
+
+                        else
+                        {
+                            if (m_board->getSquare(index).getPiece()->isPromoted())
+                                SDL_RenderCopy(m_renderer, dark_king, NULL, &r);
+
+                            else
+
+                                SDL_RenderCopy(m_renderer, dark_men, NULL, &r);
+                        }
+                    }
+                    index++;
+                }
     }
+    SDL_RenderPresent(m_renderer);
 }
 void Game::clean()
 {
     SDL_DestroyWindow(m_window);
     SDL_DestroyRenderer(m_renderer);
+    SDL_DestroyTexture(white_king);
+    SDL_DestroyTexture(white_men);
+    SDL_DestroyTexture(dark_king);
+    SDL_DestroyTexture(dark_men);
+
     SDL_Quit();
+    IMG_Quit();
     std::cout << "Cleaned" << std::endl;
 }
-SDL_Texture *Game::loadTexture(std::string path)
+void Game::loadTextures()
 {
-    SDL_Texture *result;
     SDL_Surface *srfc;
-    if (srfc = IMG_Load(path.c_str()))
-        std::cerr << "No such file exists!" << std::endl;
-    else
+    srfc = IMG_Load("images/white_king.png");
+    if (srfc == NULL)
     {
-        if (result = SDL_CreateTextureFromSurface(m_renderer, srfc))
-            std::cerr << "Error while creating surface from file!" << std::endl;
-        SDL_FreeSurface(srfc);
+        std::cerr << "No such file exists!" << std::endl;
+        exit(1);
     }
-    return result;
+    white_king = SDL_CreateTextureFromSurface(m_renderer, srfc);
+    if (white_king == NULL)
+        std::cerr << "Error while creating surface from file!" << std::endl;
+    srfc = IMG_Load("images/white_men.png");
+    if (srfc == NULL)
+    {
+        std::cerr << "No such file exists!" << std::endl;
+        exit(1);
+    }
+    white_men = SDL_CreateTextureFromSurface(m_renderer, srfc);
+    if (white_men == NULL)
+        std::cerr << "Error while creating surface from file!" << std::endl;
+    srfc = IMG_Load("images/dark_king.png");
+    if (srfc == NULL)
+    {
+        std::cerr << "No such file exists!" << std::endl;
+        exit(1);
+    }
+    dark_king = SDL_CreateTextureFromSurface(m_renderer, srfc);
+    if (dark_king == NULL)
+        std::cerr << "Error while creating surface from file!" << std::endl;
+    srfc = IMG_Load("images/dark_men.png");
+    if (srfc == NULL)
+    {
+        std::cerr << "No such file exists!" << std::endl;
+        exit(1);
+    }
+    dark_men = SDL_CreateTextureFromSurface(m_renderer, srfc);
+    if (dark_men == NULL)
+        std::cerr << "Error while creating surface from file!" << std::endl;
+    SDL_FreeSurface(srfc);
 }

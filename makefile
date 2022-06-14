@@ -1,7 +1,7 @@
 TRGDIR=./
 OBJ=./obj
 FLAGS= -Wall -pedantic -std=gnu++2a -g -iquote inc
-WXINC=   -I"include" -L"lib" -Wall -lmingw32 -lSDL2main -lSDL2 -lSDL2_image
+WXINC=   -I"include" -L"lib" -Wall -lSDL2main -lSDL2 -lSDL2_image
 ${TRGDIR}/a.out: ${OBJ} ${OBJ}/main.o ${OBJ}/Game.o ${OBJ}/CheckerBoard.o ${OBJ}/Square.o ${OBJ}/Piece.o
 	g++ -o ${TRGDIR}/a.out ${OBJ}/main.o ${OBJ}/Game.o ${OBJ}/CheckerBoard.o ${OBJ}/Square.o ${OBJ}/Piece.o ${WXINC}
 	

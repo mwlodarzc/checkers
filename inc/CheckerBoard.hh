@@ -4,6 +4,7 @@
 #include <memory>
 #include <cmath>
 #include <vector>
+#include <tuple>
 #include "Square.hh"
 class CheckerBoard
 {
@@ -29,6 +30,8 @@ public:
     std::vector<std::shared_ptr<Square>> check_paths(int index);
 
 public:
+    int gridize(int x, int y) const;
+    std::tuple<int, int> gridize(int index) const;
     void set_board();
     void flip_board();
     void turn_over();
@@ -36,6 +39,7 @@ public:
     bool move(int idChosen, int idDest);
     void promote(int index);
     bool game_over() const;
+    Square &getSquare(int index);
     std::shared_ptr<Square> operator[](int index);
 };
 
