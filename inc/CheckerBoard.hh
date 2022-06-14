@@ -2,18 +2,22 @@
 #define CHECKER_BOARD_HH
 #include <iostream>
 #include <memory>
+#include <cmath>
 #include <vector>
 #include "Square.hh"
 class CheckerBoard
 {
 private:
-    size_t m_gridSize = 10;
-    Square *m_grid;
+    int m_gridSize = 5;
+    std::vector<std::shared_ptr<Square>> m_grid;
     bool m_whiteTurn;
     bool m_whitePerspective;
-    std::vector<std::shared_ptr<Piece>> m_lightPieces;
-    std::vector<std::shared_ptr<Piece>> m_darkPieces;
-    int index(size_t xCoordinate, size_t yCoordinate) const;
+
+private:
+    std::vector<std::shared_ptr<Square>> check_paths_men(int index);
+    std::vector<std::shared_ptr<Square>> check_paths_king(int index);
+    bool can_attack_men(int index);
+    bool can_attack_king(int index);
 
 public:
     CheckerBoard();
@@ -21,17 +25,18 @@ public:
     ~CheckerBoard();
 
 public:
+    bool can_attack(int index);
+    std::vector<std::shared_ptr<Square>> check_paths(int index);
+
+public:
     void set_board();
     void flip_board();
     void turn_over();
-    std::vector<std::shared_ptr<Piece>> get_pieces();
     void clear();
-    bool can_attack(std::shared_ptr<Piece> piece);
-    std::vector<std::shared_ptr<Square>> check_paths(std::shared_ptr<Piece> piece);
-    bool move(size_t xChosen, size_t yChosen, size_t xDest, size_t yDest);
-    bool promote(size_t xChosen, size_t yChosen);
+    bool move(int idChosen, int idDest);
+    void promote(int index);
     bool game_over() const;
-    Square &operator()(size_t xCoordinate, size_t yCoordinate);
+    std::shared_ptr<Square> operator[](int index);
 };
 
 std::ostream &operator<<(std::ostream &strm, CheckerBoard &printed);

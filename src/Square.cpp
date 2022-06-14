@@ -1,6 +1,15 @@
 #include "Square.hh"
-Square::Square() : piece(nullptr) {}
-Square::Square(std::shared_ptr<Piece> p) : piece(p) {}
+Square::Square(int id) : index(id), piece(nullptr) {}
+Square::Square(Square *p)
+{
+    index = p->index;
+    piece = p->piece;
+}
+Square::Square(Square &p)
+{
+    index = p.index;
+    piece = p.piece;
+}
 Square::~Square() = default;
 void Square::clear()
 {
@@ -12,7 +21,6 @@ void Square::placePiece(std::shared_ptr<Piece> p)
     removePiece();
     piece = p;
 }
-Square::Square(Piece &p) { piece = std::make_shared<Piece>(p); }
 std::shared_ptr<Piece> Square::getPiece() { return piece; }
 void Square::removePiece()
 {
@@ -29,9 +37,10 @@ bool Square::movePiece(Square &square)
         std::cerr << "fail1" << std::endl;
         return false;
     }
-
     square.piece = piece;
     piece = nullptr;
     return true;
 }
 bool Square::isEmpty() const { return piece == nullptr; }
+void Square::setIndex(int i) { index = i; }
+int Square::getIndex() const { return index; }

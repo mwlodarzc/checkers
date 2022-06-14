@@ -3,8 +3,12 @@
 /**
  * Non parameter constructor
  */
-CheckerBoard::CheckerBoard() : m_gridSize(10), m_grid(new Square[m_gridSize * m_gridSize])
+CheckerBoard::CheckerBoard() : m_gridSize(10), m_grid()
 {
+    for (int i = 0; i < 50; i++)
+    {
+        m_grid.push_back(std::make_shared<Square>(i));
+    }
     set_board();
     m_whiteTurn = true;
     m_whitePerspective = true;
@@ -18,47 +22,19 @@ CheckerBoard::CheckerBoard(CheckerBoard &c) = default;
 /**
  * Destructor
  */
-CheckerBoard::~CheckerBoard() { delete[] m_grid; }
-
-/**
- * Indexing method
- */
-int CheckerBoard::index(size_t xCoordinate, size_t yCoordinate) const
-{
-    if (xCoordinate < 0 || xCoordinate >= m_gridSize || yCoordinate < 0 || yCoordinate >= m_gridSize)
-    {
-        std::cerr << "Coordinates exceed board size!" << std::endl;
-        exit(1);
-    }
-    return xCoordinate + m_gridSize * yCoordinate;
-}
-
+CheckerBoard::~CheckerBoard() = default;
 /**
  * Board default setting method
  */
 void CheckerBoard::set_board()
 {
-    std::shared_ptr<Piece> tmp;
-    for (size_t i = 0; i < m_gridSize; i++)
+    for (int i = 0; i < 20; i++)
     {
-        for (size_t j = 0; j < m_gridSize; j++)
-        {
-            if (i % 2 != j % 2)
-            {
-                if (i < (m_gridSize - 1) / 2)
-                {
-                    tmp = std::make_shared<Piece>(i, j, true, false);
-                    m_grid[index(i, j)].placePiece(tmp);
-                    m_lightPieces.push_back(tmp);
-                }
-                else if (i > (m_gridSize + 1) / 2)
-                {
-                    tmp = std::make_shared<Piece>(i, j, false, false);
-                    m_grid[index(i, j)].placePiece(tmp);
-                    m_darkPieces.push_back(tmp);
-                }
-            }
-        }
+        m_grid[i]->placePiece(std::make_shared<Piece>(true, false));
+    }
+    for (int i = 30; i < 50; i++)
+    {
+        m_grid[i]->placePiece(std::make_shared<Piece>(false, false));
     }
 }
 
@@ -67,15 +43,9 @@ void CheckerBoard::set_board()
  */
 void CheckerBoard::flip_board()
 {
-    Square tmp;
-    // 180 deg rotation
-    for (size_t i = 0; i < m_gridSize / 2; i++)
-        for (size_t j = 0; j < m_gridSize; j++)
-        {
-            tmp = m_grid[index(m_gridSize - (1 + i), j)];
-            m_grid[index(m_gridSize - (1 + i), j)] = m_grid[index(i, m_gridSize - (1 + j))];
-            m_grid[index(i, m_gridSize - (1 + j))] = tmp;
-        }
+    auto tmp = m_grid.begin();
+    m_grid.begin() = m_grid.end();
+    m_grid.end() = tmp;
 }
 /**
  * Non parameter constructor
@@ -87,171 +57,50 @@ void CheckerBoard::turn_over()
 /**
  * Non parameter constructor
  */
-std::vector<std::shared_ptr<Piece>> CheckerBoard::get_pieces()
-{
-    if (m_whiteTurn)
-        return m_lightPieces;
-    return m_darkPieces;
-}
-/**
- * Non parameter constructor
- */
 void CheckerBoard::clear()
 {
-    for (size_t i = 0; i < m_gridSize * m_gridSize; i++)
-        m_grid->clear();
+    for (int i = 0; i < 50; i++)
+        m_grid[i]->clear();
     set_board();
-}
-/**
- * Non parameter constructor
- */
-bool CheckerBoard::can_attack(std::shared_ptr<Piece> piece)
-{
-    Square *current, *next;
-    int xVert[] = {1, 1, -1, -1}, yVert[] = {1, -1, -1, 1};
-    bool stop = false;
-    if (piece != nullptr)
-        for (size_t i = 0; i < 4; i++)
-        {
-            current = &m_grid[index(piece->getX() + xVert[i], piece->getY() + yVert[i])];
-            next = &m_grid[index(piece->getX() + 2 * xVert[i], piece->getY() + 2 * yVert[i])];
-            if (piece->isPromoted())
-            {
-                for (int j = 1; piece->getX() + j * xVert[i] >= 0 && piece->getX() + j * xVert[i] < 10 && piece->getY() + j * yVert[i] >= 0 && piece->getY() + j * yVert[i] < 10 && !stop; j++)
-                {
-                    if (!current->isEmpty() && next->isEmpty() && current->getPiece()->isLightColoured() != piece->isLightColoured())
-                        return true;
-                    if (!current->isEmpty() && next->isEmpty() && current->getPiece()->isLightColoured() == piece->isLightColoured())
-                        stop = true;
-                }
-                stop = false;
-            }
-            else
-            {
-                if (piece->getX() + 2 * xVert[i] >= 0 && piece->getX() + 2 * xVert[i] < 10 && piece->getY() + 2 * yVert[i] >= 0 && piece->getY() + 2 * yVert[i] < 10)
-                {
-                    if (!current->isEmpty() && next->isEmpty() && current->getPiece()->isLightColoured() != piece->isLightColoured())
-                        return true;
-                }
-            }
-        }
-    return false;
 }
 /**
  * Spagetti code for checking paths
  */
-// std::vector<std::shared_ptr<Square>> CheckerBoard::check_paths(std::shared_ptr<Piece> piece)
-// {
-//     std::vector<std::shared_ptr<Square>> result;
-//     std::vector<std::shared_ptr<Square>> tmp;
-//     bool attacks = false;
-//     Square *current, *next, *attacked;
-//     Piece removed;
-//     int xVert[] = {1, 1, -1, -1}, yVert[] = {1, -1, -1, 1};
-//     if (can_attack(piece)) // calculate the most effective route
-//         for (size_t i = 0; i < 4; i++)
-//         {
-//             attacks = false;
-//             attacked = NULL;
-//             current = &m_grid[index(piece->getX() + xVert[i], piece->getY() + yVert[i])];
-//             next = &m_grid[index(piece->getX() + 2 * xVert[i], piece->getY() + 2 * yVert[i])];
-//             if (piece->isPromoted())
-//             {
-//                 for (int j = 2; piece->getX() + j * xVert[i] >= 0 && piece->getX() + j * xVert[i] < 10 && piece->getY() + j * yVert[i] >= 0 && piece->getY() + j * yVert[i] < 10 && (!current->isEmpty() && current->getPiece()->isLightColoured() == piece->isLightColoured()); j++)
-//                 {
-//                     if (attacked != NULL)
-//                     {
-//                         if (attacks)
-//                         {
-//                             removed = *attacked->getPiece();
-//                             attacked->removePiece();
-//                             if (can_attack(current->getPiece()))
-//                             {
-//                                 tmp = check_paths(current->getPiece());
-//                                 if (tmp.size() > result.size())
-//                                     result = tmp;
-//                             }
-//                             attacked->placePiece(std::make_shared<Piece>(removed));
-//                         }
-//                         else
-//                             result.push_back(std::make_shared<Square>(current));
-//                     }
-//                     if (!current->isEmpty() && attacked != NULL)
-//                     {
-//                         attacked = current;
-//                         for (int l = j + 1; piece->getX() + l * xVert[i] >= 0 && piece->getX() + l * xVert[i] < 10 && piece->getY() + l * yVert[i] >= 0 && piece->getY() + l * yVert[i] < 10 && (current->isEmpty() || current->getPiece()->isLightColoured() == piece->isLightColoured()); l++)
-//                         {
-//                             removed = *attacked->getPiece();
-//                             attacked->removePiece();
-//                             if (can_attack(m_grid[index(piece->getX() + l * xVert[i], piece->getY() + l * yVert[i])].getPiece()))
-//                                 attacks = true;
-//                         }
-//                         attacked->placePiece(std::make_shared<Piece>(removed));
-//                     }
-//                     if (current->isEmpty() && attacked != NULL)
-//                     {
-//                         attacked = NULL;
-//                     }
-//                     current = &m_grid[index(piece->getX() + j * xVert[i], piece->getY() + j * yVert[i])];
-//                     next = &m_grid[index(piece->getX() + (j + 1) * xVert[i], piece->getY() + (j + 1) * yVert[i])];
-//                 }
-//             }
-//             else
-//             {
-//                 if (!current->isEmpty() & next->isEmpty())
-//                     result.push_back(std::make_shared<Square>(current));
-//             }
-//         }
-//     else
-//     {
-//         for (size_t i = 0; i < 4; i++)
-//         {
-//             current = &m_grid[index(piece->getX() + xVert[i], piece->getY() + yVert[i])];
-//             if (piece->isPromoted())
-//                 for (int j = 2; piece->getX() + j * xVert[i] >= 0 && piece->getX() + j * xVert[i] < 10 && piece->getY() + j * yVert[i] >= 0 && piece->getY() + j * yVert[i] < 10 && current->isEmpty(); j++)
-//                 {
-//                     result.push_back(std::make_shared<Square>(m_grid[index(piece->getX() + j * xVert[i], piece->getY() + j * yVert[i])]));
-//                     current = &m_grid[index(piece->getX() + j * xVert[i], piece->getY() + j * yVert[i])];
-//                 }
-//             else
-//             {
-//                 if (piece->getX() + xVert[i] >= 0 && piece->getX() + xVert[i] < 10 && piece->getY() + yVert[i] >= 0 && piece->getY() + yVert[i] < 10 && current->isEmpty())
-//                     result.push_back(std::make_shared<Square>(current));
-//             }
-//         }
-//     }
-//     return result;
-// }
 
-bool CheckerBoard::move(size_t xChosen, size_t yChosen, size_t xDest, size_t yDest)
+bool CheckerBoard::move(int idChosen, int idDest)
 {
-    // if (xDest % 2 == yDest % 2 || xChosen % 2 == yChosen % 2)
-    // {
-    //     std::cerr << "first" << std::endl;
-    //     return false;
-    // }
-    // if (!m_grid[index(yChosen, xChosen)].getPiece()->isPromoted())
-    // {
-    // }
-
-    return m_grid[index(yChosen, xChosen)].movePiece(m_grid[index(yDest, xDest)]);
+    std::vector<std::shared_ptr<Square>> moves;
+    if (idChosen < 0 || idChosen >= 50 || idDest < 0 || idDest >= 50)
+    {
+        std::cerr << "out of bounds" << std::endl;
+        return false;
+    }
+    // PUT IN CHECK FOR DISTANCE (CAN BE DEPENDEND ON COLOUR IF EASIER)
+    moves = check_paths(idChosen);
+    while (!moves.empty())
+    {
+        if (moves.front()->getIndex() == idDest)
+            return m_grid[idChosen]->movePiece(*m_grid[idDest]);
+    }
+    return false;
 }
-Square &CheckerBoard::operator()(size_t xCoordinate, size_t yCoordinate) { return m_grid[index(xCoordinate, yCoordinate)]; }
+std::shared_ptr<Square> CheckerBoard::operator[](int index) { return m_grid[index]; }
 
 std::ostream &operator<<(std::ostream &strm, CheckerBoard &printed)
 {
+    int index = 0;
     strm << "#########################################" << std::endl;
-    for (size_t i = 0; i < 10; i++)
+    for (int i = 0; i < 10; i++)
     {
         strm << "#";
-        for (size_t j = 0; j < 10; j++)
+        for (int j = 0; j < 5; j++, index++)
         {
-            if (printed(i, j).isEmpty())
+            if (printed[index]->isEmpty())
                 strm << "   #";
             else
             {
-                if (printed(i, j).getPiece()->isLightColoured())
-                    strm << " + #";
+                if (printed[index]->getPiece()->isLightColoured())
+                    strm << " * #";
                 else
                     strm << " x #";
             }
@@ -261,4 +110,309 @@ std::ostream &operator<<(std::ostream &strm, CheckerBoard &printed)
         strm << std::endl;
     }
     return strm;
+}
+
+void CheckerBoard::promote(int index) { m_grid[index]->getPiece()->promotePiece(); }
+
+bool CheckerBoard::can_attack(int index)
+{
+    return m_grid[index]->getPiece()->isPromoted() ? can_attack_king(index) : can_attack_men(index);
+}
+bool CheckerBoard::can_attack_king(int index)
+{
+    std::shared_ptr<Piece> piece = m_grid[index]->getPiece();
+    int denom = 0;
+    if (piece != nullptr)
+        if (piece->isPromoted())
+            if (index % 5 > 0 && index % 5 < 4)
+            {
+                if (index - ((index / 10) * 10) >= 5 && index - ((index / 10) * 10) < 10)
+                    denom = 1;
+                if (index < 40)
+                {
+                    // TL
+                    if (!m_grid[index + 5 - denom]->isEmpty() && m_grid[index + 5 - denom]->getPiece()->isLightColoured() != piece->isLightColoured() && m_grid[index + 10 - 1]->isEmpty())
+                        return true;
+                    // TR
+                    if (!m_grid[index + 5 + 1 - denom]->isEmpty() && m_grid[index + 5 + 1 - denom]->getPiece()->isLightColoured() != piece->isLightColoured() && m_grid[index + 10 + 1]->isEmpty())
+                        return true;
+                }
+                if (index > 9)
+                {
+                    // TL
+                    if (!m_grid[index - 5 - denom]->isEmpty() && m_grid[index - 5 - denom]->getPiece()->isLightColoured() != piece->isLightColoured() && m_grid[index - 10 - 1]->isEmpty())
+                        return true;
+                    // TR
+                    if (!m_grid[index - 5 + 1 - denom]->isEmpty() && m_grid[index - 5 + 1 - denom]->getPiece()->isLightColoured() != piece->isLightColoured() && m_grid[index - 10 + 1]->isEmpty())
+                        return true;
+                }
+            }
+    return false;
+}
+std::vector<std::shared_ptr<Square>> CheckerBoard::check_paths_king(int index)
+{
+    std::vector<std::shared_ptr<Square>> result;
+    std::vector<std::shared_ptr<Square>> tmp;
+    int denom = 0;
+
+    std::shared_ptr<Piece> piece = m_grid[index]->getPiece();
+    if (piece != nullptr)
+    {
+        if (piece->isPromoted())
+        {
+            if (index - ((index / 10) * 10) >= 5 && index - ((index / 10) * 10) < 10)
+                denom = 1;
+            if (can_attack_king(index))
+            {
+                if (index % 5 > 0 && index % 5 < 4)
+                {
+                    if (index < 40)
+                    {
+                        // TL
+                        if (!m_grid[index + 5 - denom]->isEmpty() && m_grid[index + 5 - denom]->getPiece()->isLightColoured() != piece->isLightColoured() && m_grid[index + 10 - 1]->isEmpty())
+                        {
+                            result.push_back(m_grid[index + 10 - 1]);
+                            if (can_attack_king(index + 10 - 1))
+                                tmp = check_paths_king(index + 10 - 1);
+                            if (tmp.size() > result.size())
+                                result = tmp;
+                        }
+                        // TR
+                        if (!m_grid[index + 5 + 1 - denom]->isEmpty() && m_grid[index + 5 + 1 - denom]->getPiece()->isLightColoured() != piece->isLightColoured() && m_grid[index + 10 + 1]->isEmpty())
+                        {
+                            result.push_back(m_grid[index + 10 + 1]);
+                            if (can_attack_king(index + 10 + 1))
+                                tmp = check_paths_king(index + 10 + 1);
+                            if (tmp.size() > result.size())
+                                result = tmp;
+                        }
+                    }
+                    if (index > 9)
+                    {
+                        // TL
+                        if (!m_grid[index - 5 - denom]->isEmpty() && m_grid[index - 5 - denom]->getPiece()->isLightColoured() != piece->isLightColoured() && m_grid[index - 10 - 1]->isEmpty())
+                        {
+                            result.push_back(m_grid[index - 10 + 1]);
+                            if (can_attack_king(index - 10 + 1))
+                                tmp = check_paths_king(index - 10 + 1);
+                            if (tmp.size() > result.size())
+                                result = tmp;
+                        }
+                        // TR
+                        if (!m_grid[index - 5 + 1 - denom]->isEmpty() && m_grid[index - 5 + 1 - denom]->getPiece()->isLightColoured() != piece->isLightColoured() && m_grid[index - 10 + 1]->isEmpty())
+                        {
+                            result.push_back(m_grid[index - 10 - 1]);
+                            if (can_attack_king(index - 10 - 1))
+                                tmp = check_paths_king(index - 10 - 1);
+                            if (tmp.size() > result.size())
+                                result = tmp;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                if (index < 45)
+                {
+                    // TL
+                    if (m_grid[index + 5 - denom]->isEmpty())
+                        result.push_back(m_grid[index + 5 - denom]);
+
+                    // TR
+                    if (m_grid[index + 5 + 1 - denom]->isEmpty())
+                        result.push_back(m_grid[index + 5 + 1 - denom]);
+                }
+                if (index > 4)
+                {
+                    // TL
+                    if (m_grid[index - 5 - denom]->isEmpty())
+                        result.push_back(m_grid[index - 5 - denom]);
+
+                    // TR
+                    if (!m_grid[index - 5 + 1 - denom]->isEmpty())
+                        result.push_back(m_grid[index - 5 + 1 - denom]);
+                }
+            }
+        }
+    }
+    return result;
+}
+// WORKING!
+bool CheckerBoard::can_attack_men(int index)
+{
+    int idCur, idNext;
+    bool second = false;
+    int direction = 0;
+    std::shared_ptr<Piece> piece = m_grid[index]->getPiece();
+    if (piece != nullptr)
+        if (!piece->isPromoted())
+        {
+            if (piece->isLightColoured() == m_whitePerspective)
+                direction = 1;
+            else
+                direction = -1;
+            std::cout << "Attack check men" << std::endl;
+            if ((direction == 1 && index < 40) || (direction == -1 && index > 9))
+            {
+                // DR
+                if (second)
+                {
+                    if (index % 5 < 4)
+                    {
+                        idCur = index + direction * (5 + direction);
+                        idNext = idCur + direction * 5;
+                        std::cout << "check DR " << idCur << " next: " << idNext << std::endl;
+                        if (!m_grid[idCur]->isEmpty() && m_grid[idCur]->getPiece()->isLightColoured() != piece->isLightColoured() && m_grid[idNext]->isEmpty())
+                            return true;
+                    }
+                }
+                else
+                {
+                    idCur = index + direction * 5;
+                    idNext = idCur + direction * (5 + direction);
+                    std::cout << "check DR " << idCur << " next: " << idNext << std::endl;
+                    if (!m_grid[idCur]->isEmpty() && m_grid[idCur]->getPiece()->isLightColoured() != piece->isLightColoured() && m_grid[idNext]->isEmpty())
+                        return true;
+                }
+                // DL
+                if (second)
+                {
+                    idCur = index + direction * 5;
+                    idNext = idCur + direction * (5 - direction);
+                    std::cout << "check DR " << idCur << " next: " << idNext << std::endl;
+                    if (!m_grid[idCur]->isEmpty() && m_grid[idCur]->getPiece()->isLightColoured() != piece->isLightColoured() && m_grid[idNext]->isEmpty())
+                        return true;
+                }
+                else
+                {
+                    if (index % 5 > 0)
+                    {
+                        idCur = index + direction * (5 - direction);
+                        idNext = idCur + direction * 5;
+                        std::cout << "check DR " << idCur << " next: " << idNext << std::endl;
+                        if (!m_grid[idCur]->isEmpty() && m_grid[idCur]->getPiece()->isLightColoured() != piece->isLightColoured() && m_grid[idNext]->isEmpty())
+                            return true;
+                    }
+                }
+            }
+        }
+    return false;
+}
+std::vector<std::shared_ptr<Square>> CheckerBoard::check_paths_men(int index)
+{
+    std::vector<std::shared_ptr<Square>> result;
+    int idCur, idNext;
+    bool second = false;
+    int direction = 0;
+    std::shared_ptr<Piece> piece = m_grid[index]->getPiece();
+
+    if (piece != nullptr)
+    {
+        if (!piece->isPromoted())
+        {
+            if (index - ((index / 10) * 10) >= 5 && index - ((index / 10) * 10) < 10)
+                second = true;
+            if (piece->isLightColoured() == m_whitePerspective)
+                direction = 1;
+            else
+                direction = -1;
+            if (can_attack_men(index))
+            {
+                std::cout << "Attack paths men" << std::endl;
+                if ((direction == 1 && index < 40) || (direction == -1 && index > 9))
+                {
+                    // DR
+                    if (second)
+                    {
+                        if (index % 5 < 4)
+                        {
+                            idCur = index + direction * (5 + direction);
+                            idNext = idCur + direction * 5;
+                            std::cout << "check DR " << idCur << " next: " << idNext << std::endl;
+                            if (!m_grid[idCur]->isEmpty() && m_grid[idCur]->getPiece()->isLightColoured() != piece->isLightColoured() && m_grid[idNext]->isEmpty())
+                                result.push_back(m_grid[idNext]);
+                        }
+                    }
+                    else
+                    {
+                        idCur = index + direction * 5;
+                        idNext = idCur + direction * (5 + direction);
+                        std::cout << "check DR " << idCur << " next: " << idNext << std::endl;
+                        if (!m_grid[idCur]->isEmpty() && m_grid[idCur]->getPiece()->isLightColoured() != piece->isLightColoured() && m_grid[idNext]->isEmpty())
+                            result.push_back(m_grid[idNext]);
+                    }
+                    // DL
+                    if (second)
+                    {
+                        idCur = index + direction * 5;
+                        idNext = idCur + direction * (5 - direction);
+                        std::cout << "check DR " << idCur << " next: " << idNext << std::endl;
+                        if (!m_grid[idCur]->isEmpty() && m_grid[idCur]->getPiece()->isLightColoured() != piece->isLightColoured() && m_grid[idNext]->isEmpty())
+                            result.push_back(m_grid[idNext]);
+                    }
+                    else
+                    {
+                        if (index % 5 > 0)
+                        {
+                            idCur = index + direction * (5 - direction);
+                            idNext = idCur + direction * 5;
+                            std::cout << "check DR " << idCur << " next: " << idNext << std::endl;
+                            if (!m_grid[idCur]->isEmpty() && m_grid[idCur]->getPiece()->isLightColoured() != piece->isLightColoured() && m_grid[idNext]->isEmpty())
+                                result.push_back(m_grid[idNext]);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                std::cout << "Neutral paths men" << std::endl;
+                if ((direction == 1 && index < 45) || (direction == -1 && index > 4))
+                {
+                    // DR
+                    if (second)
+                    {
+                        if (index % 5 < 4)
+                        {
+                            std::cout << "check DR " << index + direction * (5 + direction) << std::endl;
+                            if (m_grid[index + direction * (5 + direction)]->isEmpty())
+                                result.push_back(m_grid[index + direction * (5 + direction)]);
+                        }
+                    }
+                    else
+                    {
+                        std::cout << "check DR " << index + direction * 5 << std::endl;
+                        if (m_grid[index + direction * 5]->isEmpty())
+                            result.push_back(m_grid[index + direction * 5]);
+                    }
+                    // DL
+                    if (second)
+                    {
+                        std::cout << "check DL " << index + direction * 5 << std::endl;
+                        if (m_grid[index + direction * 5]->isEmpty())
+                            result.push_back(m_grid[index + direction * 5]);
+                    }
+                    else
+                    {
+                        if (index % 5 > 0)
+                        {
+                            std::cout << "check DL " << index + direction * (5 - direction) << std::endl;
+                            if (m_grid[index + direction * (5 - direction)]->isEmpty())
+                                result.push_back(m_grid[index + direction * (5 - direction)]);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return result;
+}
+
+std::vector<std::shared_ptr<Square>> CheckerBoard::check_paths(int index)
+{
+    if (m_grid[index]->getPiece() == nullptr)
+    {
+        std::cerr << "Piece doesnt exist!" << std::endl;
+        return std::vector<std::shared_ptr<Square>>();
+    }
+    return m_grid[index]->getPiece()->isPromoted() ? check_paths_king(index) : check_paths_men(index);
 }

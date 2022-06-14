@@ -1,9 +1,9 @@
 TRGDIR=./
 OBJ=./obj
 FLAGS= -Wall -pedantic -std=gnu++2a -g -iquote inc
-WXINC= `wx-config --cppflags --libs`
-${TRGDIR}/a.out: ${OBJ} ${OBJ}/main.o ${OBJ}/CheckerBoard.o ${OBJ}/Square.o ${OBJ}/Piece.o
-	g++ -o ${TRGDIR}/a.out ${OBJ}/main.o ${OBJ}/CheckerBoard.o ${OBJ}/Square.o ${OBJ}/Piece.o ${WXINC}
+WXINC=   -I"include" -L"lib" -Wall -lmingw32 -lSDL2main -lSDL2 -lSDL2_image
+${TRGDIR}/a.out: ${OBJ} ${OBJ}/main.o ${OBJ}/Game.o ${OBJ}/CheckerBoard.o ${OBJ}/Square.o ${OBJ}/Piece.o
+	g++ -o ${TRGDIR}/a.out ${OBJ}/main.o ${OBJ}/Game.o ${OBJ}/CheckerBoard.o ${OBJ}/Square.o ${OBJ}/Piece.o ${WXINC}
 	
 ${OBJ}:
 	mkdir ${OBJ}
@@ -20,11 +20,8 @@ ${OBJ}/Square.o: src/Square.cpp
 ${OBJ}/Piece.o: src/Piece.cpp 
 	g++ -c ${FLAGS} -o ${OBJ}/Piece.o src/Piece.cpp ${WXINC}
 
-# ${OBJ}/GameWindow.o: src/GameWindow.cpp 
-# 	g++ -c ${FLAGS} -o ${OBJ}/GameWindow.o src/GameWindow.cpp ${WXINC}
-
-# ${OBJ}/CheckerBoard.o: src/CheckerBoard.cpp 
-# 	g++ -c ${FLAGS} -o ${OBJ}/CheckerBoard.o src/CheckerBoard.cpp 
+${OBJ}/Game.o: src/Game.cpp 
+	g++ -c ${FLAGS} -o ${OBJ}/Game.o src/Game.cpp ${WXINC}
 
 clear:
 	rm -r ${OBJ} a.out
