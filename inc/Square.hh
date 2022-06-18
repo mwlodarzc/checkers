@@ -6,14 +6,15 @@
 class Square
 {
 private:
-    int index;
+    std::pair<int, int> coords;
     std::shared_ptr<Piece> piece;
 
 public:
     Square() = default;
-    Square(int id);
+    Square(std::pair<int, int> Coords);
     Square(Square *p);
     Square(Square &p);
+    Square(const Square &p);
     ~Square();
     void clear();
     void placePiece(std::shared_ptr<Piece> p);
@@ -21,8 +22,8 @@ public:
     void removePiece();
     bool movePiece(Square &square);
     bool isEmpty() const;
-    void setIndex(int i);
-    int getIndex() const;
+    void setCoords(std::pair<int, int> Coords);
+    std::pair<int, int> getCoords() const;
 };
 
 #endif

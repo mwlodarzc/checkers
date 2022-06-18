@@ -4,7 +4,7 @@
 int main()
 {
     Game *checkers = new Game();
-    checkers->init("Checkers game", 0, 0, 1000, 1000, 0);
+    checkers->init("Checkers game", 920, 0, 1000, 1000, 0);
     while (checkers->running())
     {
         checkers->handleEvents();

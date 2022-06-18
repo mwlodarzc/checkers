@@ -45,10 +45,19 @@ void Game::handleEvents()
         SDL_GetMouseState(&x, &y);
         x = std::floor(x / m_pixelSize);
         y = std::floor(y / m_pixelSize);
-        std::cout << "x,y : " << x << "," << y << std::endl;
-        if (x % 2 == y % 2)
+        if (!(x + y) % 2)
             break;
-        std::cout << "black " << m_board->gridize(x, y) << std::endl;
+        std::cout << x << "," << y << std::endl;
+        // std::cout << *m_board << std::endl;
+        m_moves = m_board->check_paths(std::pair<int, int>(x, y));
+        std::cout << std::endl;
+
+        while (!m_moves.empty())
+        {
+            std::cout << m_moves.back()->getCoords().first << "," << m_moves.back()->getCoords().second << std::endl;
+            m_moves.pop_back();
+        }
+
         break;
     default:
         break;
@@ -57,6 +66,7 @@ void Game::handleEvents()
 void Game::update() {}
 void Game::renderer()
 {
+    std::pair<int, int> p;
     if (m_ongoing)
     {
         SDL_RenderClear(m_renderer);
@@ -65,17 +75,17 @@ void Game::renderer()
         SDL_RenderClear(m_renderer);
         SDL_SetRenderDrawColor(m_renderer, 50, 0, 50, 255);
 
-        for (int i = 0, index = 0; i < 10; i++)
+        for (int i = 0; i < 10; i++)
             for (int j = 0; j < 10; j++)
                 if (i % 2 != j % 2)
                 {
                     SDL_Rect r = {j * m_pixelSize, i * m_pixelSize, m_pixelSize, m_pixelSize};
                     SDL_RenderFillRect(m_renderer, &r);
-                    if (!m_board->getSquare(index).isEmpty())
+                    if (!m_board->getSquare(std::pair<int, int>(i, j)).isEmpty())
                     {
-                        if (m_board->getSquare(index).getPiece()->isLightColoured())
+                        if (m_board->getSquare(std::pair<int, int>(i, j)).getPiece()->isLightColoured())
 
-                            if (m_board->getSquare(index).getPiece()->isPromoted())
+                            if (m_board->getSquare(std::pair<int, int>(i, j)).getPiece()->isPromoted())
                                 SDL_RenderCopy(m_renderer, white_king, NULL, &r);
 
                             else
@@ -83,7 +93,7 @@ void Game::renderer()
 
                         else
                         {
-                            if (m_board->getSquare(index).getPiece()->isPromoted())
+                            if (m_board->getSquare(std::pair<int, int>(i, j)).getPiece()->isPromoted())
                                 SDL_RenderCopy(m_renderer, dark_king, NULL, &r);
 
                             else
@@ -91,8 +101,41 @@ void Game::renderer()
                                 SDL_RenderCopy(m_renderer, dark_men, NULL, &r);
                         }
                     }
-                    index++;
                 }
+        // SDL_RenderCopy(m_renderer, white_king, NULL, &r);
+        // while (!m_moves.empty())
+        // {
+        //     p = m_moves.back()->getCoords();
+        //     SDL_Rect r = {p.first * m_pixelSize, p.second * m_pixelSize, m_pixelSize, m_pixelSize};
+        //     if (m_board->getSquare(p).getPiece()->isLightColoured())
+        //     {
+        //         if (m_board->getSquare(p).getPiece()->isPromoted())
+        //         {
+        //             SDL_SetTextureAlphaMod(white_king, 128);
+        //             SDL_RenderCopy(m_renderer, white_king, NULL, &r);
+        //         }
+        //         else
+        //         {
+        //             SDL_SetTextureAlphaMod(white_king, 128);
+        //             SDL_RenderCopy(m_renderer, white_men, NULL, &r);
+        //         }
+        //     }
+        //     else
+        //     {
+        //         if (m_board->getSquare(p).getPiece()->isPromoted())
+        //         {
+        //             SDL_SetTextureAlphaMod(white_king, 128);
+        //             SDL_RenderCopy(m_renderer, dark_king, NULL, &r);
+        //         }
+        //         else
+        //         {
+
+        //             SDL_SetTextureAlphaMod(white_king, 128);
+        //             SDL_RenderCopy(m_renderer, dark_men, NULL, &r);
+        //         }
+        //     }
+        //     m_moves.pop_back();
+        // }
     }
     SDL_RenderPresent(m_renderer);
 }
@@ -104,7 +147,6 @@ void Game::clean()
     SDL_DestroyTexture(white_men);
     SDL_DestroyTexture(dark_king);
     SDL_DestroyTexture(dark_men);
-
     SDL_Quit();
     IMG_Quit();
     std::cout << "Cleaned" << std::endl;
@@ -149,4 +191,11 @@ void Game::loadTextures()
     if (dark_men == NULL)
         std::cerr << "Error while creating surface from file!" << std::endl;
     SDL_FreeSurface(srfc);
+}
+
+void Game::displayMoves(int x, int y)
+{
+    if (x % 2 != y % 2)
+    {
+    }
 }

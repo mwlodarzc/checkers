@@ -24,6 +24,7 @@ private:
 
 private:
     void loadTextures();
+    void displayMoves(int x, int y);
 
 public:
     Game();

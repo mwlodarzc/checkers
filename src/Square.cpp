@@ -1,13 +1,18 @@
 #include "Square.hh"
-Square::Square(int id) : index(id), piece(nullptr) {}
+Square::Square(std::pair<int, int> Coords) : coords(Coords), piece(nullptr) {}
 Square::Square(Square *p)
 {
-    index = p->index;
+    coords = p->coords;
     piece = p->piece;
 }
 Square::Square(Square &p)
 {
-    index = p.index;
+    coords = p.coords;
+    piece = p.piece;
+}
+Square::Square(const Square &p)
+{
+    coords = p.coords;
     piece = p.piece;
 }
 Square::~Square() = default;
@@ -42,5 +47,5 @@ bool Square::movePiece(Square &square)
     return true;
 }
 bool Square::isEmpty() const { return piece == nullptr; }
-void Square::setIndex(int i) { index = i; }
-int Square::getIndex() const { return index; }
+void Square::setCoords(std::pair<int, int> Coords) { coords = Coords; }
+std::pair<int, int> Square::getCoords() const { return coords; }
