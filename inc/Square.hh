@@ -12,15 +12,12 @@ private:
 public:
     Square() = default;
     Square(std::pair<int, int> Coords);
-    Square(Square *p);
-    Square(Square &p);
-    Square(const Square &p);
     ~Square();
     void clear();
     void placePiece(std::shared_ptr<Piece> p);
-    std::shared_ptr<Piece> getPiece();
+    Piece &getPiece();
+    void promotePiece();
     void removePiece();
-    bool movePiece(Square &square);
     bool isEmpty() const;
     void setCoords(std::pair<int, int> Coords);
     std::pair<int, int> getCoords() const;

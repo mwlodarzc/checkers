@@ -2,8 +2,8 @@ TRGDIR=./
 OBJ=./obj
 FLAGS= -Wall -pedantic -std=gnu++2a -g -iquote inc
 WXINC=   -I"include" -L"lib" -Wall -lSDL2main -lSDL2 -lSDL2_image
-${TRGDIR}/a.out: ${OBJ} ${OBJ}/main.o ${OBJ}/Game.o ${OBJ}/CheckerBoard.o ${OBJ}/Square.o ${OBJ}/Piece.o
-	g++ -o ${TRGDIR}/a.out ${OBJ}/main.o ${OBJ}/Game.o ${OBJ}/CheckerBoard.o ${OBJ}/Square.o ${OBJ}/Piece.o ${WXINC}
+${TRGDIR}/a.out: ${OBJ} ${OBJ}/main.o ${OBJ}/Bot.o ${OBJ}/Game.o ${OBJ}/CheckerBoard.o ${OBJ}/Square.o ${OBJ}/Piece.o
+	g++ -o ${TRGDIR}/a.out ${OBJ}/main.o ${OBJ}/Bot.o ${OBJ}/Game.o ${OBJ}/CheckerBoard.o ${OBJ}/Square.o ${OBJ}/Piece.o ${WXINC}
 	
 ${OBJ}:
 	mkdir ${OBJ}
@@ -22,6 +22,9 @@ ${OBJ}/Piece.o: src/Piece.cpp
 
 ${OBJ}/Game.o: src/Game.cpp 
 	g++ -c ${FLAGS} -o ${OBJ}/Game.o src/Game.cpp ${WXINC}
+
+${OBJ}/Bot.o: src/Bot.cpp 
+	g++ -c ${FLAGS} -o ${OBJ}/Bot.o src/Bot.cpp ${WXINC}
 
 clear:
 	rm -r ${OBJ} a.out

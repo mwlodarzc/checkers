@@ -3,6 +3,7 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include "CheckerBoard.hh"
+#include "Bot.hh"
 
 class Game
 {
@@ -13,21 +14,25 @@ private:
     int m_pixelSize = 100;
 
 private:
-    CheckerBoard *m_board;
+    CheckerBoard m_board;
     std::vector<std::shared_ptr<Square>> m_moves;
+    std::pair<int, int> m_pickedCoords;
+    bool m_playsWhite;
+    bool m_pieceSelected;
+    int m_botDepth;
 
 private:
     SDL_Texture *white_king = NULL;
     SDL_Texture *white_men = NULL;
     SDL_Texture *dark_king = NULL;
     SDL_Texture *dark_men = NULL;
+    SDL_Texture *possible_move = NULL;
 
 private:
     void loadTextures();
-    void displayMoves(int x, int y);
 
 public:
-    Game();
+    Game(bool playsWhite, int botDepth);
     ~Game();
     bool running();
     void init(std::string title, int xpos, int ypos, int width, int height, bool fullscreen);

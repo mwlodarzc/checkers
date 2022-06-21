@@ -9,7 +9,8 @@ private:
 public:
     Piece();
     Piece(bool lightColoured, bool promoted);
-    Piece(Piece &);
+    Piece(Piece &p);
+    Piece(const Piece &p);
     ~Piece();
     void promotePiece();
     bool isLightColoured() const;
